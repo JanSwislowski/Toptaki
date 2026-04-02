@@ -213,6 +213,22 @@ class StartScreen:
             return
         self.login_button.handle_event(event)
         self.register_button.handle_event(event)
+
+class FeedScreen:
+    def __init__(self):
+        pass
+    def add_post(self, post):
+        pass
+    def activate(self):
+        pass
+    def update(self):
+        pass
+    def handle_event(self,event):
+        pass
+    def reset(self):
+        pass
+    def draw(self):
+        pass
 class ProfileScreen:
     pass
 

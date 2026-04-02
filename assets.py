@@ -90,10 +90,11 @@ class TextBox:
     # Public API
     # ----------------------------------------------------------------
 
-    def handle_event(self, event) -> None:
+    def handle_event(self, event,mouse_delta=(0,0)) -> None:
         """Feed a pygame event to the text box."""
+        mouse_pos=add_vectors(pygame.mouse.get_pos(), mouse_delta)
         if event.type == pygame.MOUSEBUTTONDOWN:
-            newly_active = self.rect.collidepoint(event.pos)
+            newly_active = self.rect.collidepoint(mouse_pos)
             if newly_active and not self.active:
                 self._reset_blink()
             self.active = newly_active
@@ -1320,11 +1321,13 @@ class ComentSection:
 
 class image_gallery:
     def __init__(self,width,height,images=[]):
-        self.color=(50,50,50,180)
-        self.surface=pygame.Surface((width,height),pygame.SRCALPHA)
-
         self.width=width
-        self.height=height
+        if len(images)==0: self.height=0
+        else: self.height=height
+
+        self.color=(50,50,50,180)
+        self.surface=pygame.Surface((width,self.height),pygame.SRCALPHA)
+
         self.rect=pygame.Rect(0,0,width,height)
 
         self.scroll=0
@@ -1386,14 +1389,16 @@ class image_gallery:
             self.scroll+=self.curent_scroll
             self.scroll=max(min(self.scroll,self.max_width-self.width),0)
             self.curent_scroll=0
+from functions import generate_coment_section
 class Post:
-    def __init__(self,width,user,icon,comments: ComentSection,text="",images=[],image_height=300,comments_height=200,text_box_height=50):
+    def __init__(self,width,user,icon,comments=[],text="",images=[],image_height=300,comments_height=200,text_box_height=40):
         self.color=(50,50,50,180)
 
         self.padding=15
-
+        print(icon)
         self.width=width
-        self.image_height=image_height
+        if len(images)==0: self.image_height=0
+        else: self.image_height=image_height
 
         self.icon=Icon(15+self.padding,15+self.padding,15,image=icon)
 
@@ -1403,11 +1408,14 @@ class Post:
         self.text=Label(self.padding,text_y,text=text,color_text=(220,220,255),font_size=18,max_width=width)
 
 
-        self.comment_section=comments
         self.images=image_gallery(width-self.padding*2,image_height,images)
-
         self.images_pos=(self.padding,self.text.get_rect().h+self.padding+self.text._y)
-        self.comments_pos=(self.padding,self.images_pos[1]+self.image_height+self.padding)
+
+        self.text_box=TextBox(self.padding,self.images_pos[1]+self.image_height+self.padding,width-self.padding*2,text_box_height)
+
+        self.comment_section=generate_coment_section(comments,width-self.padding*2,comments_height,)
+
+        self.comments_pos=(self.padding,self.text_box.rect.bottom+self.padding)
 
 
         self.height=self.comments_pos[1]+self.comment_section.height+self.padding
@@ -1419,6 +1427,7 @@ class Post:
         self.user.draw(self.surface)
         self.icon.draw(self.surface)
         self.text.draw(self.surface)
+        self.text_box.draw(self.surface)
 
         self.surface.blit(self.images.draw(),self.images_pos)
 
@@ -1426,11 +1435,13 @@ class Post:
         return self.surface
     def update(self,mouse_delta=(0,0)):
         self.icon.update()
+        self.text_box.update()
         self.images.update(add_vectors(mouse_delta,(-self.images_pos[0],-self.images_pos[1])))
         self.comment_section.update(add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
     def handle_events(self,event,mouse_delta=(0,0)):
         self.comment_section.handle_events(event,add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
         self.icon.handle_event(event,mouse_delta)
+        self.text_box.handle_event(event,mouse_delta)
 
 
 

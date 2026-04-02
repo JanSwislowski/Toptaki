@@ -48,3 +48,11 @@ def upload_image(token, filename):
     id=ids[username]
     save_path=f"C:/Users/Jasiek/PycharmProjects/topoptaki3/users/{id}/images/{filename}"
     return save_path
+
+from assets import ComentSection
+def generate_coment_section(comments: list[dict],width, height):
+    c=ComentSection(width, height)
+    for comment in comments:
+        c.add_comment(user=comment["user"], text=comment["text"])
+    return c
+
