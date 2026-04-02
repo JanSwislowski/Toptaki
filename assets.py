@@ -1395,7 +1395,7 @@ class Post:
         self.color=(50,50,50,180)
 
         self.padding=15
-        print(icon)
+
         self.width=width
         if len(images)==0: self.image_height=0
         else: self.image_height=image_height

@@ -214,21 +214,30 @@ class StartScreen:
         self.login_button.handle_event(event)
         self.register_button.handle_event(event)
 
+
 class FeedScreen:
     def __init__(self):
         pass
     def add_post(self, post):
+        #Dodaje post do feedu
         pass
     def activate(self):
+        #na razie nic
         pass
     def update(self):
+        #co klatke sie odpala, mozna tu np scrolling zrobic
         pass
     def handle_event(self,event):
+        #obsługuje eventy, np kliknięcia w posty, komentarze itp
         pass
     def reset(self):
+        #the great purge
         pass
     def draw(self):
+        #rysujesz na surface returnujesz surface
         pass
+
+
 class ProfileScreen:
     pass
 
