@@ -1,5 +1,5 @@
 import pygame
-from assets import TextBox, Button, Label
+from assets import TextBox, Button, Label,Icon,Post
 class LoginScreen:
     def __init__(self,width, height):
         self.login=False
@@ -239,7 +239,123 @@ class FeedScreen:
 
 
 class ProfileScreen:
-    pass
+    def __init__(self,width, height):
+        self.color=(10, 10, 10)
+        self.width = width
+        self.height = height
+        self.surface = pygame.surface.Surface((self.width, self.height))
+        self.padding=30
+    def activate(self):
+        pass
+    def get_posts_height(self):
+        h=0
+        for i in self.posts:
+            h+=self.padding+i.height
+        return h-self.padding
+    def load(self,avatar,username,description,posts: list[Post],own_profile=False,):
+        avatar_r=50
+        text_color=(255, 255, 255)
+        self.avatar=Icon(self.padding+avatar_r,self.padding+avatar_r,avatar_r,avatar,shadow=False)
+        self.username=Label(self.avatar._cx+avatar_r+self.padding,self.padding,username,font_size=30,color_text=text_color)
+        print(description)
+
+        self.description=Label(self.padding,self.avatar._cy+avatar_r+self.padding,description,font_size=20,max_width=self.width-2*self.padding,color_text=text_color)
+        self.posts=posts
+        self.posts_starty=self.description._y+self.description.get_rect().h+self.padding
+
+        self.scroll=0
+        self.last_mouse_pos=None
+        self.block_scroll=False
+
+        self.posts_height=self.get_posts_height()
+        self.posts_render_h=self.height-self.posts_starty
+        #ładujesz dane użytkownika
+    def _update_posts(self):
+        if not self.posts:
+            return
+        y=self.posts_starty-self.scroll
+        starty=self.posts_starty
+        x=self.width/2-self.posts[0].width/2
+        for i in self.posts:
+            if y+i.height<starty:
+                y+=i.height+self.padding
+                continue
+            i.update(mouse_delta=(-x,-y))
+            y+=i.height+self.padding
+            if y>self.height:
+                break
+    def _posts_handle_event(self,event):
+        if not self.posts:
+            return
+        y=self.posts_starty-self.scroll
+        starty=self.posts_starty
+        x=self.width/2-self.posts[0].width/2
+        for i in self.posts:
+            if y+i.height<starty:
+                continue
+            i.handle_events(event,(-x,-y))
+            y+=i.height+self.padding
+            if y>self.height:
+                break
+
+    def hovered_post(self):
+        return pygame.mouse.get_pos()[1]>self.posts_starty
+    def update_scroll(self):
+        if self.block_scroll:
+            return
+        mouse_pos=pygame.mouse.get_pos()
+        if pygame.mouse.get_pressed()[0] and self.last_mouse_pos:
+            self.scroll-=mouse_pos[1]-self.last_mouse_pos[1]
+            self.scroll=min(max(self.scroll,0),self.posts_height-self.posts_render_h)
+            self.last_mouse_pos=mouse_pos
+        elif pygame.mouse.get_pressed()[0] and self.hovered_post():
+            self.last_mouse_pos=mouse_pos
+        else:
+            self.last_mouse_pos=None
+    def check_scroll_block(self):
+        self.block_scroll=False
+        for i in self.posts:
+            if i.scrolling:
+                self.block_scroll=True
+                return
+
+    def update(self):
+        self._update_posts()
+        self.check_scroll_block()
+        self.update_scroll()
+
+    def handle_event(self,event):
+        self._posts_handle_event(event)
+    def reset(self):
+        self.posts=[]
+        self.avatar=None
+        self.username=None
+    def _render_posts(self):
+        if not self.posts:
+            return
+        y=self.posts_starty-self.scroll
+        starty=self.posts_starty
+        x=self.width/2-self.posts[0].width/2
+        for i in self.posts:
+            if y+i.height<starty:
+                y+=i.height+self.padding
+                continue
+            self.surface.blit(i.draw(),(x, y))
+            y+=i.height+self.padding
+            if y>self.height:
+                break
+
+    def draw(self):
+        self.surface.fill(self.color)
+
+        self._render_posts()
+        pygame.draw.rect(self.surface,self.color,(0, 0, self.width, self.posts_starty))
+        self.avatar.draw(self.surface)
+        self.username.draw(self.surface)
+        self.description.draw(self.surface)
+
+        return self.surface
+
 
 class App:
     def __init__(self):

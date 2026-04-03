@@ -1,4 +1,5 @@
-from assets import Post, ComentSection
+from assets import Post
+from app import ProfileScreen
 import pygame
 screen=pygame.display.set_mode((500, 700))
 text=("This is a test post. It should be long enough"
@@ -13,19 +14,26 @@ c=[{"user":"User1","text":"This is a comment."},
    {"user":"User3","text":"This is yet another comment."},
    {"user":"User4","text":"This is a fourth comment."}]
 
-post=Post(400, "Test Post",None,c,images=images,text=text)
-post_pos=(50, 50)
-post_pos_delta=(-post_pos[0], -post_pos[1])
+post=Post(400, "Test Post",None,c,images=images,text=text,)
+
+ps=ProfileScreen(500, 700)
+text=r"This is a test profile screen. It should display the user's information and their posts. asifdafi as asf afs fafas\n asdaffas\n dasdasdad asdfasf"
+posts=[post, post, post]
+ps.load(None,"NIGGer",text,posts,None)
+
+pos=(0, 0)
+pos_delta=(-pos[0], -pos[1])
+
 running=True
 # post_pos_delta=(0, 0)
 while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-        post.handle_events(event,post_pos_delta)
+        ps.handle_event(event,)
     screen.fill((0, 0, 0))
-    post.update(post_pos_delta)
+    ps.update()
 
-    screen.blit(post.draw(), post_pos)
+    screen.blit(ps.draw(), pos)
 
     pygame.display.flip()

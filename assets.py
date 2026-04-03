@@ -880,7 +880,7 @@ class Label:
         """Split _text into lines respecting max_width (and hard newlines)."""
         if not self._text:
             return [""]
-        hard_lines = self._text.split("\n")
+        hard_lines = self._text.split(r"\n")
         if not self._max_width:
             return hard_lines
         result = []
@@ -1277,6 +1277,7 @@ class ComentSection:
         self.scroll=0
         self.curent_scroll=0
         self.prev_mouse_y=None
+        self.is_scrolled=False
     def get_height(self):
         h=0
         for comment in self.comments:
@@ -1306,11 +1307,13 @@ class ComentSection:
             if not self.prev_mouse_y:
                 self.prev_mouse_y=pygame.mouse.get_pos()[1]
             self.curent_scroll=self.prev_mouse_y-pygame.mouse.get_pos()[1]
+            self.is_scrolled=True
         else:
             self.scroll+=self.curent_scroll
             self.scroll=max(min(self.scroll,self.c_height-self.height),0)
             self.curent_scroll=0
             self.prev_mouse_y=None
+            self.is_scrolled=False
 
     def handle_events(self,event,mouse_delta=(0,0)):
         scroll=self.scroll+self.curent_scroll
@@ -1333,6 +1336,7 @@ class image_gallery:
         self.scroll=0
         self.curent_scroll=0
         self.prev_mouse_x=None
+        self.is_scrolled=False
 
         self.circle_r=3
         self.cicle_diff=10
@@ -1384,11 +1388,13 @@ class image_gallery:
             if not self.prev_mouse_x:
                 self.prev_mouse_x=pygame.mouse.get_pos()[0]
             self.curent_scroll=self.prev_mouse_x-pygame.mouse.get_pos()[0]
+            self.is_scrolled=True
         else:
             self.prev_mouse_x=0
             self.scroll+=self.curent_scroll
             self.scroll=max(min(self.scroll,self.max_width-self.width),0)
             self.curent_scroll=0
+            self.is_scrolled=False
 from functions import generate_coment_section
 class Post:
     def __init__(self,width,user,icon,comments=[],text="",images=[],image_height=300,comments_height=200,text_box_height=40):
@@ -1400,7 +1406,7 @@ class Post:
         if len(images)==0: self.image_height=0
         else: self.image_height=image_height
 
-        self.icon=Icon(15+self.padding,15+self.padding,15,image=icon)
+        self.icon=Icon(15+self.padding,15+self.padding,15,image=icon,shadow=False)
 
         text_y=self.icon._cy+self.icon._radius+5
 
@@ -1421,6 +1427,7 @@ class Post:
         self.height=self.comments_pos[1]+self.comment_section.height+self.padding
 
         self.surface=pygame.Surface((width,self.height),pygame.SRCALPHA)
+        self.scrolling= False
     def draw(self):
 
         self.surface.fill(self.color)
@@ -1433,11 +1440,14 @@ class Post:
 
         self.surface.blit(self.comment_section.draw(),self.comments_pos)
         return self.surface
+    def check_scrolling(self):
+        self.scrolling=self.images.is_scrolled or self.comment_section.is_scrolled
     def update(self,mouse_delta=(0,0)):
         self.icon.update()
         self.text_box.update()
         self.images.update(add_vectors(mouse_delta,(-self.images_pos[0],-self.images_pos[1])))
         self.comment_section.update(add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
+        self.check_scrolling()
     def handle_events(self,event,mouse_delta=(0,0)):
         self.comment_section.handle_events(event,add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
         self.icon.handle_event(event,mouse_delta)
