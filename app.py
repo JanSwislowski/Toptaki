@@ -292,8 +292,23 @@ class ProfileScreen:
         x=self.width/2-self.posts[0].width/2
         for i in self.posts:
             if y+i.height<starty:
+                y+=i.height+self.padding
                 continue
             i.handle_events(event,(-x,-y))
+            y+=i.height+self.padding
+            if y>self.height:
+                break
+    def _render_posts(self):
+        if not self.posts:
+            return
+        y=self.posts_starty-self.scroll
+        starty=self.posts_starty
+        x=self.width/2-self.posts[0].width/2
+        for i in self.posts:
+            if y+i.height<starty:
+                y+=i.height+self.padding
+                continue
+            self.surface.blit(i.draw(),(x, y))
             y+=i.height+self.padding
             if y>self.height:
                 break
@@ -330,20 +345,6 @@ class ProfileScreen:
         self.posts=[]
         self.avatar=None
         self.username=None
-    def _render_posts(self):
-        if not self.posts:
-            return
-        y=self.posts_starty-self.scroll
-        starty=self.posts_starty
-        x=self.width/2-self.posts[0].width/2
-        for i in self.posts:
-            if y+i.height<starty:
-                y+=i.height+self.padding
-                continue
-            self.surface.blit(i.draw(),(x, y))
-            y+=i.height+self.padding
-            if y>self.height:
-                break
 
     def draw(self):
         self.surface.fill(self.color)
