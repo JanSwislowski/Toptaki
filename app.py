@@ -271,7 +271,7 @@ class ProfileScreen:
         self.posts_render_h=self.height-self.posts_starty
         #ładujesz dane użytkownika
     def _update_posts(self):
-        if not self.posts:
+        if not self.posts or pygame.mouse.get_pos()[1]<self.posts_starty:
             return
         y=self.posts_starty-self.scroll
         starty=self.posts_starty

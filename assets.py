@@ -1303,10 +1303,10 @@ class ComentSection:
 
         for comment in self.comments:
             comment.update()
-        if pygame.mouse.get_pressed()[0] and self.is_hovered(mouse_pos):
-            if not self.prev_mouse_y:
-                self.prev_mouse_y=pygame.mouse.get_pos()[1]
+        if pygame.mouse.get_pressed()[0] and self.is_scrolled:
             self.curent_scroll=self.prev_mouse_y-pygame.mouse.get_pos()[1]
+        elif pygame.mouse.get_pressed()[0] and self.is_hovered(mouse_pos):
+            self.prev_mouse_y=pygame.mouse.get_pos()[1]
             self.is_scrolled=True
         else:
             self.scroll+=self.curent_scroll
@@ -1384,10 +1384,10 @@ class image_gallery:
         return self.rect.collidepoint(mp)
     def update(self,mouse_delta=(0,0)):
         mouse_pos=add_vectors(pygame.mouse.get_pos(),mouse_delta)
-        if pygame.mouse.get_pressed()[0] and self.is_hovered(mouse_pos):
-            if not self.prev_mouse_x:
-                self.prev_mouse_x=pygame.mouse.get_pos()[0]
+        if pygame.mouse.get_pressed()[0] and self.is_scrolled:
             self.curent_scroll=self.prev_mouse_x-pygame.mouse.get_pos()[0]
+        elif pygame.mouse.get_pressed()[0] and self.is_hovered(mouse_pos):
+            self.prev_mouse_x=pygame.mouse.get_pos()[0]
             self.is_scrolled=True
         else:
             self.prev_mouse_x=0
@@ -1445,11 +1445,11 @@ class Post:
     def update(self,mouse_delta=(0,0)):
         self.icon.update()
         self.text_box.update()
-        self.images.update(add_vectors(mouse_delta,(-self.images_pos[0],-self.images_pos[1])))
-        self.comment_section.update(add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
+        if not self.comment_section.is_scrolled: self.images.update(add_vectors(mouse_delta,(-self.images_pos[0],-self.images_pos[1])))
+        if not self.images.is_scrolled: self.comment_section.update(add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
         self.check_scrolling()
     def handle_events(self,event,mouse_delta=(0,0)):
-        self.comment_section.handle_events(event,add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
+        if not self.images.is_scrolled: self.comment_section.handle_events(event,add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
         self.icon.handle_event(event,mouse_delta)
         self.text_box.handle_event(event,mouse_delta)
 
