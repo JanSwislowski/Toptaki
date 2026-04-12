@@ -216,26 +216,94 @@ class StartScreen:
 
 
 class FeedScreen:
-    def __init__(self):
-        pass
+    def __init__(self,width,height):
+        self.color=(10, 10, 10)
+        self.w=width
+        self.h=height
+        self.surface=pygame.surface.Surface((self.w,self.h))
+        text_w=400
+        text_h=40
+        x,y=50,25
+        self.textbox=TextBox(x,y,text_w,text_h,placeholder="What's on your mind?")
+
+        self.posts=[]
+        self.start_y=80
+        self.padding=20
+
+        self.last_mouse_y=None
+        self.scroll=0
+
+        self.post_h=0
+
     def add_post(self, post):
-        #Dodaje post do feedu
-        pass
+        self.posts.append(post)
+        self.post_h=self.posts_height()
+    def posts_height(self):
+        h=0
+        for i in self.posts:
+            h+=i.height+self.padding
+        return h-self.padding
     def activate(self):
         #na razie nic
         pass
+    def _update_scroll(self):
+
+        for i in self.posts:
+            if i.scrolling:
+                return
+
+        mc=pygame.mouse.get_pressed()[0]
+        mouse_y=pygame.mouse.get_pos()[1]
+        Wspeed=1
+        if mc and self.last_mouse_y==None:
+            self.last_mouse_y=mouse_y
+        elif mc:
+            self.scroll+=(mouse_y-self.last_mouse_y)*Wspeed
+            self.scroll=max(min(self.scroll,0),self.h-self.start_y-self.post_h)
+            self.last_mouse_y=mouse_y
+        else:
+            self.last_mouse_y=None
+
+
+
     def update(self):
-        #co klatke sie odpala, mozna tu np scrolling zrobic
-        pass
+        self.textbox.update()
+        self._update_scroll()
+        x=self.w/2-self.posts[0].width/2
+        y=self.start_y+self.scroll
+        for i in self.posts:
+            i.update(mouse_delta=(-x,-y))
+            y+=i.height+self.padding
+
     def handle_event(self,event):
-        #obsługuje eventy, np kliknięcia w posty, komentarze itp
-        pass
+        self.textbox.handle_event(event)
+
+        x=self.w/2-self.posts[0].width/2
+        y=self.start_y+self.scroll
+        for i in self.posts:
+            i.handle_events(event,mouse_delta=(-x,-y))
+            y+=i.height+self.padding
     def reset(self):
         #the great purge
         pass
+    def _posts_draw(self):
+        if not self.posts:
+            return self.surface
+        x=self.w/2-self.posts[0].width/2
+        y=self.start_y+self.scroll
+        for i in self.posts:
+            self.surface.blit(i.draw(),(x, y))
+            y+=i.height+self.padding
     def draw(self):
-        #rysujesz na surface returnujesz surface
-        pass
+        self.surface.fill(self.color)
+
+        self._posts_draw()
+        pygame.draw.rect(self.surface,self.color,(0, 0, self.w, self.start_y))
+
+        self.textbox.draw(self.surface)
+
+        return self.surface
+
 
 
 class ProfileScreen:

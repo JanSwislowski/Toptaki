@@ -1,5 +1,5 @@
 from assets import Post
-from app import ProfileScreen
+from app import FeedScreen
 import pygame
 screen=pygame.display.set_mode((500, 700))
 text=("This is a test post. It should be long enough"
@@ -15,11 +15,13 @@ c=[{"user":"User1","text":"This is a comment."},
    {"user":"User4","text":"This is a fourth comment."}]
 
 post=Post(400, "Test Post",None,c,images=images,text=text,)
+post2=Post(400, "Test Post 2",None,c,images=images,text=text,)
+post3=Post(400, "Test Post 3",None,c,images=images,text=text,)
 
-ps=ProfileScreen(500, 700)
-text=r"This is a test profile screen. It should display the user's information and their posts. asifdafi as asf afs fafas\n asdaffas\n dasdasdad asdfasf"
-posts=[post, post, post]
-ps.load(None,"NIGGer",text,posts,None)
+fs=FeedScreen(500,700)
+fs.add_post(post)
+fs.add_post(post2)
+fs.add_post(post3)
 
 pos=(0, 0)
 pos_delta=(-pos[0], -pos[1])
@@ -30,10 +32,10 @@ while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-        ps.handle_event(event,)
+        fs.handle_event(event,)
     screen.fill((0, 0, 0))
-    ps.update()
+    fs.update()
 
-    screen.blit(ps.draw(), pos)
+    screen.blit(fs.draw(), pos)
 
     pygame.display.flip()
