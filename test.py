@@ -1,5 +1,5 @@
 from assets import Post
-from app import FeedScreen
+from app import *
 import pygame
 screen=pygame.display.set_mode((500, 700))
 text=("This is a test post. It should be long enough"
@@ -18,10 +18,7 @@ post=Post(400, "Test Post",None,c,images=images,text=text,)
 post2=Post(400, "Test Post 2",None,c,images=images,text=text,)
 post3=Post(400, "Test Post 3",None,c,images=images,text=text,)
 
-fs=FeedScreen(500,700)
-fs.add_post(post)
-fs.add_post(post2)
-fs.add_post(post3)
+pe=Profile_edit_screen(500,700)
 
 pos=(0, 0)
 pos_delta=(-pos[0], -pos[1])
@@ -32,10 +29,10 @@ while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-        fs.handle_event(event,)
+        pe.handle_event(event,)
     screen.fill((0, 0, 0))
-    fs.update()
+    pe.update()
 
-    screen.blit(fs.draw(), pos)
+    screen.blit(pe.draw(), pos)
 
     pygame.display.flip()

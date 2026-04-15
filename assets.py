@@ -697,6 +697,7 @@ class Label:
         icon_side:    str   = "left",
         line_spacing: int   = 4,
         fade_in:      bool  = False,
+        pos_type:      str   = "topleft",
     ):
         self._x            = x
         self._y            = y
@@ -729,9 +730,15 @@ class Label:
         # cache (rebuilt on set_text / set_image)
         self._dirty   = True
         self._cache:  "pygame.Surface | None" = None
-        self._rect:   pygame.Rect             = pygame.Rect(x, y, 0, 0)
 
         self._last_tick = pygame.time.get_ticks()
+
+        if pos_type != "topleft":
+            w,h=self.get_rect().size
+            self._x-=w//2
+            self._y-=h//2
+        self._rect:   pygame.Rect             = pygame.Rect(self._x, self._y, 0, 0)
+
 
     # ----------------------------------------------------------------
     # Public API
@@ -1452,6 +1459,36 @@ class Post:
         if not self.images.is_scrolled: self.comment_section.handle_events(event,add_vectors(mouse_delta,(-self.comments_pos[0],-self.comments_pos[1])))
         self.icon.handle_event(event,mouse_delta)
         self.text_box.handle_event(event,mouse_delta)
+class Picker:
+    def __init__(self,cx,y,width,height,font_size,options=[],color=(50,50,50),chosen_color=(100,100,100),text_color=(220,220,255)):
+        self.font_size=font_size
+        x=cx-width/2
+        self.rect=pygame.Rect(x,y,width,height)
+        self.options=options
+        self.color=color
+        self.chosen_color=chosen_color
+        self.text_color=text_color
+        self.chosen=0
+        self.height=height
+    def draw(self,surface):
+        w=self.rect.width/len(self.options)
+        for i,option in enumerate(self.options):
+            color=self.chosen_color if i==self.chosen else self.color
+            option_rect=pygame.Rect(self.rect.x+i*w,self.rect.y,w,self.height)
+            pygame.draw.rect(surface,color,option_rect)
+            label=Label(option_rect.centerx,option_rect.centery,text=option,color_text=self.text_color,font_size=self.font_size,pos_type="center")
+            label.draw(surface)
+    def update(self):
+        if pygame.mouse.get_pressed()[0]:
+            mouse_pos=pygame.mouse.get_pos()
+            if self.rect.collidepoint(mouse_pos):
+                w=self.rect.width/len(self.options)
+                clicked_option=int((mouse_pos[0]-self.rect.x)/w)
+                self.chosen=clicked_option
+    def get_chosen(self):
+        return self.options[self.chosen]
+    def rest(self):
+        self.chosen=0
 
 
 

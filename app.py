@@ -1,8 +1,8 @@
 import pygame
-from assets import TextBox, Button, Label,Icon,Post
+from assets import TextBox, Button, Label,Icon,Post,Picker
 class LoginScreen:
-    def __init__(self,width, height):
-        self.login=False
+    def __init__(self,width, height,next_page):
+        self.login=True
         self.width = width
         self.height = height
 
@@ -15,11 +15,11 @@ class LoginScreen:
         self.username_box = TextBox(100, 100, text_box_width, text_box_height,placeholder="Username")
         self.password_box = TextBox(100, 160, text_box_width, text_box_height,placeholder="Password")
 
-        button_width = 80
+        button_width = 200
         button_height = 40
 
-        self.login_button = Button(100, 220, button_width, button_height, "Login")
-        self.register_button = Button(200, 220, button_width, button_height, "Register")
+        self.login_button = Button(100, 400, button_width, button_height, "Login",callback=next_page)
+        self.register_button = Button(100, 400, button_width, button_height, "Register",callback=next_page)
 
         self.fade_in=False
         self.fade_out=False
@@ -118,7 +118,7 @@ class LoginScreen:
         if self.login: self.login_button.handle_event(event)
         else: self.register_button.handle_event(event)
 class StartScreen:
-    def __init__(self,width, height,next_page_function):
+    def __init__(self,width, height,login_function,register_function):
         self.width = width
         self.height = height
 
@@ -128,8 +128,8 @@ class StartScreen:
         button_width = 200
         button_height = 50
 
-        self.login_button = Button(100, 250, button_width, button_height, "Login",callback=next_page_function)
-        self.register_button = Button(100, 320, button_width, button_height, "Register")
+        self.login_button = Button(100, 250, button_width, button_height, "Login",callback=login_function)
+        self.register_button = Button(100, 320, button_width, button_height, "Register",callback=register_function)
 
         self.title=Label(100, 50, "Toptaki", font_size=60)
 
@@ -221,10 +221,10 @@ class FeedScreen:
         self.w=width
         self.h=height
         self.surface=pygame.surface.Surface((self.w,self.h))
-        text_w=400
-        text_h=40
-        x,y=50,25
-        self.textbox=TextBox(x,y,text_w,text_h,placeholder="What's on your mind?")
+        text_w=300
+        text_h=30
+        x,y=50,10
+        self.textbox=TextBox(x,y,text_w,text_h,placeholder="Search",font_size=20)
 
         self.posts=[]
         self.start_y=80
@@ -267,6 +267,8 @@ class FeedScreen:
 
 
     def update(self):
+        if not self.posts:
+            return
         self.textbox.update()
         self._update_scroll()
         x=self.w/2-self.posts[0].width/2
@@ -276,8 +278,9 @@ class FeedScreen:
             y+=i.height+self.padding
 
     def handle_event(self,event):
+        if not self.posts:
+            return
         self.textbox.handle_event(event)
-
         x=self.w/2-self.posts[0].width/2
         y=self.start_y+self.scroll
         for i in self.posts:
@@ -303,7 +306,32 @@ class FeedScreen:
         self.textbox.draw(self.surface)
 
         return self.surface
-
+class Profile_edit_screen:
+    def __init__(self,width, height):
+        self.color=(10, 10, 10)
+        self.width = width
+        self.height = height
+        self.surface = pygame.surface.Surface((self.width, self.height))
+        font_size=30
+        self.picker=Picker(width/2, 0, width, 40,font_size,["General","Avatar"],color=(20,20,20))
+        self.name_box=TextBox(30, 100, 200, 40,placeholder="Name")
+        self.description_box=TextBox(30, 300, 300, 100,placeholder="Description")
+    def update(self):
+        self.picker.update()
+        if self.picker.get_chosen()=="General":
+            self.name_box.update()
+            self.description_box.update()
+    def draw(self):
+        self.surface.fill(self.color)
+        self.picker.draw(self.surface)
+        if self.picker.get_chosen()=="General":
+            self.name_box.draw(self.surface)
+            self.description_box.draw(self.surface)
+        return self.surface
+    def handle_event(self,event):
+        pass
+    def activate(self):
+        pass
 
 
 class ProfileScreen:
@@ -425,6 +453,35 @@ class ProfileScreen:
 
         return self.surface
 
+class PageSwitcher:
+    def __init__(self,x,y,width,height,icons : list[pygame.surface.Surface],functions):
+        self.rect=pygame.Rect(x,y,width,height)
+        self.icons=icons
+        self.functions=functions
+        self.color=(100,100,100)
+        self.active_color=(70,70,70)
+        self.active=1
+        self.l=len(self.icons)
+        self.w=self.rect.w/self.l
+
+    def draw(self,surface):
+        pygame.draw.rect(surface,self.color,self.rect)
+        active_rect=pygame.Rect(self.rect.x+self.w*self.active,self.rect.y,self.w,self.rect.h)
+        pygame.draw.rect(surface,self.active_color,active_rect)
+        for j,i in enumerate(self.icons):
+            iw,ih=i.get_width(),i.get_height()
+            x=self.rect.x+self.w*j+self.w/2-iw/2
+            y=self.rect.centery-ih/2
+            surface.blit(i,(x,y))
+    def update(self):
+        if pygame.mouse.get_pressed()[0]:
+            x,y=pygame.mouse.get_pos()
+            if self.rect.collidepoint(x,y):
+                self.active=x//self.w
+
+
+
+
 
 class App:
     def __init__(self):
@@ -432,15 +489,26 @@ class App:
         self.width = 400
         self.height = 600
         self.screen=pygame.display.set_mode((self.width, self.height))
+        psh=70
         self.pages={
-                "start": StartScreen(self.width, self.height,lambda: self.switch_page("login")),
-                "login": LoginScreen(self.width, self.height)
+                "start": StartScreen(self.width, self.height,lambda: self.switch_page("login"),lambda: self.switch_page("register")),
+                "login": LoginScreen(self.width, self.height,lambda: self.switch_page("feed")),
+                "feed": FeedScreen(self.width,self.height-psh)
         }
+
+        icons=[pygame.transform.smoothscale(pygame.image.load("profile.png"),(psh-10,psh-10)),
+               pygame.transform.smoothscale(pygame.image.load("nigger.png"),(psh-10,psh-10)),
+               pygame.transform.smoothscale(pygame.image.load("battle.png"),(psh-10,psh-10)),]
+        self.page_switcher=PageSwitcher(0,self.height-psh,self.width,psh,icons,[])
         self.next_page=None
     def switch_page(self,page_name):
         # if page_name not in self.pages:
         #     return
-
+        if page_name=="login":
+            self.pages[page_name].set_login()
+        if page_name=="register":
+            page_name="login"
+            self.pages[page_name].set_register()
         self.pages[self.current_page].start_fade_out()
         self.next_page=page_name
     def update(self):
@@ -468,7 +536,9 @@ class App:
 
 
             self.screen.blit(self.pages[self.current_page].draw(),(0,0))
-
+            if self.current_page in ("feed" or "profile" or "battle"):
+                self.page_switcher.update()
+                self.page_switcher.draw(self.screen)
             pygame.display.flip()
         pygame.quit()
 if __name__ == "__main__":
