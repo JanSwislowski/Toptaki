@@ -1,5 +1,6 @@
 import os
-
+import pygame
+import numpy as np
 ID_FILE = "ids.txt"
 tokens={}
 ids={}
@@ -56,3 +57,13 @@ def generate_coment_section(comments: list[dict],width, height):
         c.add_comment(user=comment["user"], text=comment["text"])
     return c
 
+
+def fade_surfaces(surface1: pygame.Surface, surface2: pygame.Surface, ratio: float) -> pygame.Surface:
+    ratio = max(0.0, min(1.0, ratio))
+
+    arr1 = pygame.surfarray.array3d(surface1).astype(np.float32)
+    arr2 = pygame.surfarray.array3d(surface2).astype(np.float32)
+
+    blended = ((arr1 * (1.0 - ratio)) + (arr2 * ratio)).astype(np.uint8)
+
+    return pygame.surfarray.make_surface(blended)

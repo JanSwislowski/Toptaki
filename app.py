@@ -1,5 +1,6 @@
 import pygame
 from assets import TextBox, Button, Label,Icon,Post,Picker
+from functions import *
 class LoginScreen:
     def __init__(self,width, height,next_page):
         self.login=True
@@ -7,7 +8,7 @@ class LoginScreen:
         self.height = height
 
         self.surface = pygame.surface.Surface((self.width, self.height))
-        self.surface_color=(200, 200, 200)
+        self.color=(200, 200, 200)
 
         text_box_width = 200
         text_box_height=40
@@ -21,67 +22,23 @@ class LoginScreen:
         self.login_button = Button(100, 400, button_width, button_height, "Login",callback=next_page)
         self.register_button = Button(100, 400, button_width, button_height, "Register",callback=next_page)
 
-        self.fade_in=False
-        self.fade_out=False
-        self.fade_duration=400
-        self.fade_start_time=0
-
-
         self.active=False
-
-    def start_fade_out(self):
-        if self.fade_out:
-            return
-        self.fade_out=True
-        self.active=False
-        self.fade_start_time=pygame.time.get_ticks()
-    def end_fade_out(self):
-        self.fade_out=False
-        self.active=False
-    def is_fade_out_complete(self):
-        if not self.fade_out:
-            return False
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        return elapsed >= self.fade_duration
-
-    def start_fade_in(self):
-        if self.fade_in:
-            return
-        self.fade_in=True
-        self.fade_start_time=pygame.time.get_ticks()
-    def end_fade_in(self):
-        self.fade_in=False
-        self.active=True
-    def is_fade_in_complete(self):
-        if not self.fade_in:
-            return False
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        return elapsed >= self.fade_duration
-    def fade_surface(self,reverse=False):
-        rev=255 if reverse else 0
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        alpha = max(0, abs(rev-int(255 * (elapsed / self.fade_duration))))
-        fade_surface = pygame.Surface((self.width, self.height))
-        fade_surface.fill(self.surface_color)
-        fade_surface.set_alpha(alpha)
-        return fade_surface
 
     def set_login(self):
         self.login=True
     def set_register(self):
         self.login=False
-
-    def draw(self):
-        self.surface.fill(self.surface_color)
-
-        if not (self.active or self.fade_out or self.fade_in):
-            return self.surface
+    def update(self):
+        if not self.active:
+            return
 
         self.username_box.update()
         self.password_box.update()
 
         if self.login: self.login_button.update()
         else: self.register_button.update()
+    def draw(self):
+        self.surface.fill(self.color)
 
         self.username_box.draw(self.surface)
         self.password_box.draw(self.surface)
@@ -89,26 +46,13 @@ class LoginScreen:
         if self.login:  self.login_button.draw(self.surface)
         else:  self.register_button.draw(self.surface)
 
-        if self.fade_out or self.fade_in:
-            self.surface.blit(self.fade_surface(self.fade_in), (0, 0))
-
-        if self.fade_out:
-            if self.is_fade_out_complete():
-                self.end_fade_out()
-        if self.fade_in:
-            if self.is_fade_in_complete():
-                self.end_fade_in()
-
         return self.surface
-
     def reset(self):
         self.username_box.clear()
         self.password_box.clear()
-        self.active=False
-        self.fade_out=False
     def activate(self):
         self.reset()
-        self.start_fade_in()
+        self.active=True
 
     def handle_event(self,event):
         if not self.active:
@@ -123,7 +67,7 @@ class StartScreen:
         self.height = height
 
         self.surface = pygame.surface.Surface((self.width, self.height))
-        self.surface_color=(200, 200, 200)
+        self.color=(200, 200, 200)
 
         button_width = 200
         button_height = 50
@@ -133,88 +77,30 @@ class StartScreen:
 
         self.title=Label(100, 50, "Toptaki", font_size=60)
 
-        self.fade_in=False
-        self.fade_out=False
-        self.fade_duration=400
-        self.fade_start_time=0
-
         self.active=False
-
-    def start_fade_out(self):
-        if self.fade_out:
+    def update(self):
+        if not self.active:
             return
-        self.fade_out=True
-        self.active=False
-        self.fade_start_time=pygame.time.get_ticks()
-    def end_fade_out(self):
-        self.fade_out=False
-        self.active=False
-    def is_fade_out_complete(self):
-        if not self.fade_out:
-            return False
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        return elapsed >= self.fade_duration
-
-    def start_fade_in(self):
-        if self.fade_in:
-            return
-        self.fade_in=True
-        self.fade_start_time=pygame.time.get_ticks()
-    def end_fade_in(self):
-        self.fade_in=False
-        self.active=True
-    def is_fade_in_complete(self):
-        if not self.fade_in:
-            return False
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        return elapsed >= self.fade_duration
-    def fade_surface(self,reverse=False):
-        rev=255 if reverse else 0
-        elapsed = pygame.time.get_ticks() - self.fade_start_time
-        alpha = max(0, abs(rev-int(255 * (elapsed / self.fade_duration))))
-        fade_surface = pygame.Surface((self.width, self.height))
-        fade_surface.fill(self.surface_color)
-        fade_surface.set_alpha(alpha)
-        return fade_surface
-
-    def draw(self):
-        self.surface.fill(self.surface_color)
-
-        if not (self.active or self.fade_out or self.fade_in):
-            return self.surface
 
         self.login_button.update()
         self.register_button.update()
+    def draw(self):
+        self.surface.fill(self.color)
 
         self.login_button.draw(self.surface)
         self.register_button.draw(self.surface)
 
         self.title.draw(self.surface)
 
-        if self.fade_out or self.fade_in:
-            self.surface.blit(self.fade_surface(self.fade_in), (0, 0))
-
-        if self.fade_out:
-            if self.is_fade_out_complete():
-                self.end_fade_out()
-        if self.fade_in:
-            if self.is_fade_in_complete():
-                self.end_fade_in()
         return self.surface
-    def reset(self):
-        self.active=False
-        self.fade_out=False
     def activate(self):
-        self.reset()
-        self.start_fade_in()
+        self.active=True
 
     def handle_event(self,event):
         if not self.active:
             return
         self.login_button.handle_event(event)
         self.register_button.handle_event(event)
-
-
 class FeedScreen:
     def __init__(self,width,height):
         self.color=(10, 10, 10)
@@ -235,6 +121,8 @@ class FeedScreen:
 
         self.post_h=0
 
+        self.active=False
+
     def add_post(self, post):
         self.posts.append(post)
         self.post_h=self.posts_height()
@@ -244,8 +132,7 @@ class FeedScreen:
             h+=i.height+self.padding
         return h-self.padding
     def activate(self):
-        #na razie nic
-        pass
+        self.active=True
     def _update_scroll(self):
 
         for i in self.posts:
@@ -264,12 +151,10 @@ class FeedScreen:
         else:
             self.last_mouse_y=None
 
-
-
     def update(self):
+        self.textbox.update()
         if not self.posts:
             return
-        self.textbox.update()
         self._update_scroll()
         x=self.w/2-self.posts[0].width/2
         y=self.start_y+self.scroll
@@ -278,9 +163,9 @@ class FeedScreen:
             y+=i.height+self.padding
 
     def handle_event(self,event):
+        self.textbox.handle_event(event)
         if not self.posts:
             return
-        self.textbox.handle_event(event)
         x=self.w/2-self.posts[0].width/2
         y=self.start_y+self.scroll
         for i in self.posts:
@@ -332,8 +217,6 @@ class Profile_edit_screen:
         pass
     def activate(self):
         pass
-
-
 class ProfileScreen:
     def __init__(self,width, height):
         self.color=(10, 10, 10)
@@ -452,7 +335,6 @@ class ProfileScreen:
         self.description.draw(self.surface)
 
         return self.surface
-
 class PageSwitcher:
     def __init__(self,x,y,width,height,icons : list[pygame.surface.Surface],functions):
         self.rect=pygame.Rect(x,y,width,height)
@@ -463,6 +345,7 @@ class PageSwitcher:
         self.active=1
         self.l=len(self.icons)
         self.w=self.rect.w/self.l
+        self.clicked=False
 
     def draw(self,surface):
         pygame.draw.rect(surface,self.color,self.rect)
@@ -477,10 +360,12 @@ class PageSwitcher:
         if pygame.mouse.get_pressed()[0]:
             x,y=pygame.mouse.get_pos()
             if self.rect.collidepoint(x,y):
-                self.active=x//self.w
-
-
-
+                self.clicked=True
+        elif self.clicked:
+            self.clicked=False
+            x=pygame.mouse.get_pos()[0]
+            self.active=int(x//self.w)
+            self.functions[self.active]()
 
 
 class App:
@@ -493,29 +378,79 @@ class App:
         self.pages={
                 "start": StartScreen(self.width, self.height,lambda: self.switch_page("login"),lambda: self.switch_page("register")),
                 "login": LoginScreen(self.width, self.height,lambda: self.switch_page("feed")),
-                "feed": FeedScreen(self.width,self.height-psh)
+                "feed": FeedScreen(self.width,self.height-psh),
+                "profile": ProfileScreen(self.width,self.height-psh),
         }
 
-        icons=[pygame.transform.smoothscale(pygame.image.load("profile.png"),(psh-10,psh-10)),
-               pygame.transform.smoothscale(pygame.image.load("nigger.png"),(psh-10,psh-10)),
-               pygame.transform.smoothscale(pygame.image.load("battle.png"),(psh-10,psh-10)),]
-        self.page_switcher=PageSwitcher(0,self.height-psh,self.width,psh,icons,[])
+        icons=[pygame.transform.smoothscale(pygame.image.load("images/profile.png"),(psh-10,psh-10)),
+               pygame.transform.smoothscale(pygame.image.load("images/home.png"),(psh-10,psh-10)),
+               pygame.transform.smoothscale(pygame.image.load("images/battle.png"),(psh-10,psh-10)),
+               pygame.transform.smoothscale(pygame.image.load("images/add.png"),(psh-10,psh-10)),]
+        functions=[lambda: self.switch_page("profile"),lambda: self.switch_page("feed"),lambda: self.switch_page("battle"),lambda: print("add")]
+        self.page_switcher=PageSwitcher(0,self.height-psh,self.width,psh,icons,functions)
         self.next_page=None
+
+        self.start_fade=None
+        self.fade_duration=500
+        self.fade_out=False
+        self.prev_surface=None
+        self.next_surface=None
+    def get_surfaces_to_fade(self,prev_page,next_page,reverse=False):
+        surface1=pygame.surface.Surface((self.width, self.height))
+        surface2=pygame.surface.Surface((self.width, self.height))
+        surface1.blit(self.pages[prev_page].draw(),(0,0))
+        surface2.fill(self.pages[next_page].color)
+        if prev_page in ("feed" or "profile" or "battle"):
+            self.page_switcher.draw(surface1)
+        if next_page in ("feed" or "profile" or "battle"):
+            self.page_switcher.draw(surface2)
+        if reverse:
+            self.prev_surface,self.next_surface=surface2, surface1
+            return
+        self.prev_surface, self.next_surface= surface1, surface2
     def switch_page(self,page_name):
-        # if page_name not in self.pages:
-        #     return
+        if page_name not in self.pages:
+            return
+
         if page_name=="login":
             self.pages[page_name].set_login()
         if page_name=="register":
             page_name="login"
             self.pages[page_name].set_register()
-        self.pages[self.current_page].start_fade_out()
+
+
+        self.start_fade=pygame.time.get_ticks()
+        self.get_surfaces_to_fade(self.current_page,page_name)
+
         self.next_page=page_name
-    def update(self):
-        if self.next_page and not self.pages[self.current_page].fade_out:
-            self.current_page=self.next_page
+    def update_fade(self):
+        t = pygame.time.get_ticks() - self.start_fade
+        if (not self.fade_out) and t > self.fade_duration // 2:
+            print("Fading out...")
+            self.get_surfaces_to_fade(self.next_page,self.next_page,reverse=True)
+            self.fade_out=True
+        if pygame.time.get_ticks() - self.start_fade >= self.fade_duration:
+            self.start_fade = None
+            self.current_page = self.next_page
+            self.prev_surface = None
+            self.next_surface = None
             self.pages[self.current_page].activate()
-            self.next_page=None
+            self.fade_out = False
+    def update(self):
+        if self.start_fade is not None:
+            self.update_fade()
+            return
+        self.pages[self.current_page].update()
+
+
+    def draw(self,surface):
+        if self.start_fade is not None:
+            if not self.fade_out: ratio=(pygame.time.get_ticks()-self.start_fade)*2/(self.fade_duration)
+            else: ratio=(pygame.time.get_ticks()-self.start_fade)*2/(self.fade_duration)-1
+            surface.blit(fade_surfaces(self.prev_surface,self.next_surface,ratio),(0,0))
+            return
+        surface.blit(self.pages[self.current_page].draw(),(0,0))
+
     def run(self):
         clock=pygame.time.Clock()
         running = True
@@ -529,13 +464,11 @@ class App:
                 if event.type == pygame.QUIT:
                     running = False
                 self.pages[self.current_page].handle_event(event)
+
             if keys[pygame.K_ESCAPE]:
                 running=False
-            if keys[pygame.K_RETURN]:
-                self.pages[self.current_page].start_fade_out()
 
-
-            self.screen.blit(self.pages[self.current_page].draw(),(0,0))
+            self.draw(self.screen)
             if self.current_page in ("feed" or "profile" or "battle"):
                 self.page_switcher.update()
                 self.page_switcher.draw(self.screen)
