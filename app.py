@@ -224,6 +224,7 @@ class ProfileScreen:
         self.height = height
         self.surface = pygame.surface.Surface((self.width, self.height))
         self.padding=30
+        self.posts=[]
     def activate(self):
         pass
     def get_posts_height(self):
@@ -417,7 +418,8 @@ class App:
         if page_name=="register":
             page_name="login"
             self.pages[page_name].set_register()
-
+        if page_name=="profile":
+            self.pages[page_name].load()
 
         self.start_fade=pygame.time.get_ticks()
         self.get_surfaces_to_fade(self.current_page,page_name)

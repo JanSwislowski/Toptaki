@@ -1490,5 +1490,9 @@ class Picker:
     def rest(self):
         self.chosen=0
 
-
-
+class Bar:
+    def __init__(self,x,y,width,height,label,text,elo):
+        self.width=width
+        self.height=height
+        self.rect=pygame.Rect(x,y,width,height)
+        self.label=Label
