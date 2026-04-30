@@ -19,7 +19,7 @@ post2=Post(400, "Test Post 2",None,c,images=images,text=text,)
 post3=Post(400, "Test Post 3",None,c,images=images,text=text,)
 
 pe=Profile_edit_screen(500,700)
-
+#fdxfd
 pos=(0, 0)
 pos_delta=(-pos[0], -pos[1])
 
