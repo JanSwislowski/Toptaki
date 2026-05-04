@@ -67,3 +67,26 @@ def fade_surfaces(surface1: pygame.Surface, surface2: pygame.Surface, ratio: flo
     blended = ((arr1 * (1.0 - ratio)) + (arr2 * ratio)).astype(np.uint8)
 
     return pygame.surfarray.make_surface(blended)
+def darken_rgb(color, factor):
+    r = max(0, min(255, int(color[0] * factor)))
+    g = max(0, min(255, int(color[1] * factor)))
+    b = max(0, min(255, int(color[2] * factor)))
+    return (r, g, b)
+def get_color_leaderboard(i):
+    if i==0:
+        color=(255,215,0) #gold
+    elif i==1:
+        color=(192,192,192) #silver
+    elif i==2:
+        color=(205,127,50) #bronze
+    else:
+        color=(100,100,100)
+    return color
+
+def scale_rect(rect:pygame.Rect,dx,dy,dw,dh):
+    return pygame.Rect(rect.x-dx,rect.y-dy,rect.w+dw+dx,rect.h+dh+dy)
+def normalise_scroll(scroll, content_height, view_height):
+    if content_height <= view_height:
+        return 0
+    max_scroll = content_height - view_height
+    return max(0, min(scroll, max_scroll))

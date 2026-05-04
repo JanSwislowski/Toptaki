@@ -1,4 +1,4 @@
-from assets import Post
+from assets import Post,Leader_board
 from app import *
 import pygame
 screen=pygame.display.set_mode((500, 700))
@@ -18,21 +18,42 @@ post=Post(400, "Test Post",None,c,images=images,text=text,)
 post2=Post(400, "Test Post 2",None,c,images=images,text=text,)
 post3=Post(400, "Test Post 3",None,c,images=images,text=text,)
 
-pe=Profile_edit_screen(500,700)
-
 pos=(0, 0)
 pos_delta=(-pos[0], -pos[1])
 
+players=[{"label":"1st","name":"Player1","elo":str(100)},
+         {"label":"2nd","name":"Player2","elo":str(90)},
+            {"label":"3rd","name":"Player3","elo":str(80)},
+            {"label":"4th","name":"Player4","elo":str(70)},
+            {"label":"5th","name":"Player5","elo":str(60)},
+            {"label":"6th","name":"Player6","elo":str(50)},
+            {"label":"7th","name":"Player7","elo":str(40)},
+            {"label":"8th","name":"Player8","elo":str(30)},
+            {"label":"9th","name":"Player9","elo":str(20)},
+            {"label":"10th","name":"Player10","elo":str(10)},
+            {"label":"3rd","name":"Player3","elo":str(80)},
+            {"label":"4th","name":"Player4","elo":str(70)},
+            {"label":"5th","name":"Player5","elo":str(60)},
+            {"label":"6th","name":"Player6","elo":str(50)},
+            {"label":"7th","name":"Player7","elo":str(40)},
+            {"label":"8th","name":"Player8","elo":str(30)},
+            {"label":"9th","name":"Player9","elo":str(20)},
+            {"label":"10th","name":"Player10","elo":str(10)},
+
+]
+
+lb=Leader_board(400,600,"Tournament",players)
+
 running=True
-# post_pos_delta=(0, 0)
+# lb_pos_delta=(0, 0)
 while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-        pe.handle_event(event,)
+        # pe.handle_event(event,)
     screen.fill((0, 0, 0))
-    pe.update()
+    lb.update(pos_delta)
 
-    screen.blit(pe.draw(), pos)
+    screen.blit(lb.draw(), pos)
 
     pygame.display.flip()

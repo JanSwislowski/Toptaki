@@ -733,10 +733,17 @@ class Label:
 
         self._last_tick = pygame.time.get_ticks()
 
-        if pos_type != "topleft":
+        if pos_type == "center":
             w,h=self.get_rect().size
             self._x-=w//2
             self._y-=h//2
+        if pos_type=="leftcenter":
+            w,h=self.get_rect().size
+            self._y-=h//2
+        if pos_type=="center_top":
+            w,h=self.get_rect().size
+            self._x-=w//2
+
         self._rect:   pygame.Rect             = pygame.Rect(self._x, self._y, 0, 0)
 
 
@@ -1489,6 +1496,130 @@ class Picker:
         return self.options[self.chosen]
     def rest(self):
         self.chosen=0
+
+from functions import get_color_leaderboard,darken_rgb,scale_rect,normalise_scroll
+class Bar:
+    def __init__(self,width,height,label,title,elo,bg):
+        self.rect=pygame.Rect(0,0,width,height)
+
+        self.surface=pygame.Surface((width,height))
+        self.surface.fill(bg)
+
+        label_x=5
+        lebal_y=height/2
+        self.label=Label(label_x,lebal_y,text=label,color_text=(0,0,0),font_size=18,pos_type="leftcenter")
+
+        title_x=50
+        self.title=Label(title_x,lebal_y,text=title,color_text=(0,0,0),font_size=18,pos_type="leftcenter")
+
+        elo_x=width-30
+        self.elo=Label(elo_x,lebal_y,text=str(elo),color_text=(0,0,0),font_size=18,pos_type="center")
+
+    def draw(self,color,border_color):
+        r=10
+        pygame.draw.rect(self.surface,color,self.rect,border_radius=r)
+        pygame.draw.rect(self.surface,border_color,self.rect,width=3,border_radius=r)
+        self.label.draw(self.surface)
+        self.title.draw(self.surface)
+        self.elo.draw(self.surface)
+        return self.surface
+    def hit(self,pos):
+        return self.rect.collidepoint(pos)
+class Leader_board:
+    def __init__(self, width, heiht,label,players=None):
+        if players is None:
+            players = []
+        self.width=width
+        self.height=heiht
+        self.surface=pygame.Surface((width,heiht))
+
+        self.label=Label(width/2,20,text=label,color_text=(255,255,255),font_size=40,pos_type="center_top")
+
+        self.legend_name_x=60
+        self.legend_y=100
+
+        self.legend_name=Label(self.legend_name_x,self.legend_y,text="Name",color_text=(200,200,200),font_size=18,pos_type="left")
+        self.legend_rank=Label(width-100,self.legend_y,text="Elo",color_text=(200,200,200),font_size=18,pos_type="left")
+
+        d=10
+        self.legend_rect=scale_rect(pygame.Rect(self.legend_name_x,self.legend_y,self.legend_rank.get_rect().right-self.legend_name_x,self.legend_rank.get_rect().h),d,d,d,d)
+
+        self.players=players
+
+        self.padding_y=3
+        self.bar_padding=20
+        self.color=(80,80,80)
+        self.bar_width=width-self.bar_padding*2
+        self.bars=[Bar(self.bar_width,40,player["label"],player["name"],player["elo"],self.color) for player in players]
+        self.bar_height=self.get_bar_height()
+        self.bar_start_y=150
+        self.bar_end=self.height-30
+
+        self.scroll=0
+        self.is_scrolled=False
+        self.prev_mouse_y=None
+    def get_bar_height(self):
+        h=0
+        for bar in self.bars:
+            h+=bar.rect.height+self.padding_y
+        return h-self.padding_y
+    def draw(self):
+        r=15
+        w=4
+        color=self.color
+        pygame.draw.rect(self.surface,color,(0,0,self.width,self.height),border_radius=r)#bg
+
+
+        start=self.bar_start_y
+        y=start-self.scroll
+        padding=self.padding_y
+        bar_end=self.bar_end
+
+        for i,bar in enumerate(self.bars):
+            if y+bar.rect.height<start:
+                y+=bar.rect.height+padding
+                continue
+            c=get_color_leaderboard(i)
+            border_color=darken_rgb(c,0.5)
+            self.surface.blit(bar.draw(c,border_color),(self.bar_padding,y))
+            y+=bar.rect.height+padding
+            if y>bar_end:
+                break
+
+        pygame.draw.rect(self.surface,color,(self.bar_padding,0,self.bar_width,self.bar_start_y))
+
+        pygame.draw.rect(self.surface, (30, 30, 30), self.legend_rect, border_radius=5)#legend
+
+        self.label.draw(self.surface)
+        self.legend_rank.draw(self.surface)
+        self.legend_name.draw(self.surface)
+
+        pygame.draw.rect(self.surface,color,(self.bar_padding,bar_end,self.bar_width,self.height-bar_end-w))
+
+        pygame.draw.rect(self.surface,darken_rgb(color,0.5),(0,0,self.width,self.height),width=w,border_radius=r) #border
+
+        # d=8
+        # rect=scale_rect(pygame.Rect(self.bar_padding,start,self.bar_width,bar_end-start),d,d,d,0)
+        # pygame.draw.rect(self.surface,(5,5,5),rect,border_radius=10,width=3)
+        return self.surface
+    def update(self,mouse_delta=(0,0)):
+        mp=add_vectors(pygame.mouse.get_pos(),mouse_delta)
+        if self.is_scrolled and pygame.mouse.get_pressed()[0]:
+            self.scroll=normalise_scroll(self.scroll-mp[1]+self.prev_mouse_y,self.get_bar_height(),self.bar_end-self.bar_start_y)
+            self.prev_mouse_y=mp[1]
+        elif pygame.mouse.get_pressed()[0]:
+            y=self.bar_start_y-self.scroll
+            for i,bar in enumerate(self.bars):
+                if bar.hit((mp[0]-self.bar_padding,mp[1]-y)):
+                    return i
+                y+=bar.rect.height+self.padding_y
+            self.is_scrolled=True
+            self.prev_mouse_y=mp[1]
+        else:
+            self.is_scrolled=False
+            self.prev_mouse_y=None
+        return None
+
 
 
 

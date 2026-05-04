@@ -456,7 +456,6 @@ class App:
         running = True
         self.current_page="start"
         self.pages[self.current_page].activate()
-
         while running:
             keys=pygame.key.get_pressed()
             self.update()
