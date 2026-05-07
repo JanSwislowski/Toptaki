@@ -1,5 +1,5 @@
 import pygame
-from assets import TextBox, Button, Label,Icon,Post,Picker
+from assets import TextBox, Button, Label,Icon,Post,Picker,CompCard
 from functions import *
 class LoginScreen:
     def __init__(self,width, height,next_page):
@@ -368,6 +368,87 @@ class PageSwitcher:
             self.active=int(x//self.w)
             self.functions[self.active]()
 
+class BattleScreen:
+    def __init__(self,width, height,img_width,img_height):
+        self.width = width
+        self.height=height
+        self.img_w=img_width
+        self.img_h=img_height
+        self.surface = pygame.surface.Surface((self.width, self.height))
+        self.color=(10, 10, 10)
+        button_w=75
+        button_h=75
+        padding=0
+        sz=(button_w-padding,button_h-padding)
+        heart_img=scale_surface_proportionally(pygame.image.load("images/heart.png"),sz[0],sz[1]).convert_alpha()
+        button_diff=75
+        padding_y=40
+        self.like_button=Button(self.width//2-button_w//2-button_diff,self.height-button_h-padding_y,button_w,button_h,
+                                "",image=heart_img,border_radius=button_w//2,shadow=False,color_bg=(200, 50, 50),
+                                color_hover=(255, 80, 80),color_press=(150, 30, 30),color_ripple=(255, 255, 255),callback=lambda: print("Liked!"),
+                                )
+        switch_img=scale_surface_proportionally(pygame.image.load("images/switch.png"),sz[0],sz[1])
+        self.switch_button=Button(self.width//2-button_w//2+button_diff,self.height-button_h-padding_y,button_w,button_h,
+                                "",image=switch_img,border_radius=button_w//2,shadow=False,color_bg=(50, 50, 200),
+                                color_hover=(80, 80, 255),color_press=(30, 30, 150),color_ripple=(255, 255, 255),callback=lambda: self.switch_cards(),
+                                )
+        self.transition_duration=800
+        self.transition_start_time=None
+        self.transiting=False
+    def start_transition(self):
+        if self.transition_start_time is not None:
+            return
+        self.current_card^=1
+        self.transition_start_time=pygame.time.get_ticks()
+        self.transition_surface_1=self.cards[self.current_card^1].draw().convert_alpha()
+        self.transition_surface_2=self.cards[self.current_card].draw().convert_alpha()
+    def end_transition(self):
+        self.transition_start_time=None
+        del self.transition_surface_1
+        del self.transition_surface_2
+    def switch_cards(self):
+        self.start_transition()
+    def load(self,p1_info,p2_info):
+
+        img1=scale_surface_proportionally(pygame.image.load(p1_info["img"]),self.img_w,self.img_h).convert_alpha()
+        img2=scale_surface_proportionally(pygame.image.load(p2_info["img"]),self.img_w,self.img_h).convert_alpha()
+        self.cards=[
+            CompCard(self.img_w,self.img_h,img1,
+                            pygame.image.load(p1_info["avatar"]),p1_info["name"],
+                            p1_info["title"],p1_info["date"],p1_info["cords"],p1_info["description"]),
+
+            CompCard(self.img_w,self.img_h,img2,
+                            pygame.image.load(p2_info["avatar"]),p2_info["name"],
+                            p2_info["title"],p2_info["date"],p2_info["cords"],p2_info["description"])]
+
+        self.img_pos=(self.width//2-self.img_w//2, 50)
+        self.current_card=0
+    def handle_event(self,event):
+        self.like_button.handle_event(event)
+        self.switch_button.handle_event(event)
+        if self.transition_start_time is not None:
+            return
+    def update(self,mouse_delta=(0,0)):
+        self.like_button.update()
+        self.switch_button.update()
+        if self.transition_start_time is not None:
+            t=pygame.time.get_ticks()-self.transition_start_time
+            if t>=self.transition_duration:
+                self.end_transition()
+            return
+
+        self.cards[self.current_card].update((mouse_delta[0]-self.img_pos[0], mouse_delta[1]-self.img_pos[1]))
+    def draw(self):
+        self.surface.fill(self.color)
+        if self.transition_start_time is None: self.surface.blit(self.cards[self.current_card].draw(),self.img_pos)
+        else:
+            self.surface.blit(self.transition_surface_1,self.img_pos)
+            t=pygame.time.get_ticks()-self.transition_start_time
+            self.surface.blit(melt_transition(self.transition_surface_1,self.transition_surface_2,self.transition_duration,t),self.img_pos)
+
+        self.like_button.draw(self.surface)
+        self.switch_button.draw(self.surface)
+        return self.surface
 
 class App:
     def __init__(self):

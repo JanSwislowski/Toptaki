@@ -302,6 +302,8 @@ class TextBox:
         if char in TextBox.POLISH_CHARS:
             return True
         return len(char) == 1 and char.isprintable()
+
+
 class Button:
     """
     A polished Pygame button with click animations, hover effects,
@@ -348,61 +350,61 @@ class Button:
     """
 
     # Animation timing (seconds)
-    _HOVER_SPEED   = 8.0    # lerp speed for hover colour transition
-    _RIPPLE_LIFE   = 0.45   # seconds a ripple lives
-    _PRESS_SCALE   = 0.94   # scale factor while pressed
-    _SHADOW_NORMAL = 4      # shadow blur radius at rest
-    _SHADOW_HOVER  = 8      # shadow blur radius on hover
+    _HOVER_SPEED = 8.0  # lerp speed for hover colour transition
+    _RIPPLE_LIFE = 0.45  # seconds a ripple lives
+    _PRESS_SCALE = 0.94  # scale factor while pressed
+    _SHADOW_NORMAL = 4  # shadow blur radius at rest
+    _SHADOW_HOVER = 8  # shadow blur radius on hover
 
     def __init__(
-        self,
-        x: int,
-        y: int,
-        width: int,
-        height: int,
-        label: str = "",
-        image: "pygame.Surface | None" = None,
-        image_size: "tuple[int,int] | None" = None,
-        callback=None,
-        # style
-        font=None,
-        font_size: int = 22,
-        color_bg:     tuple = (255, 255, 255),
-        color_hover:  tuple = (230, 238, 255),
-        color_press:  tuple = (200, 215, 245),
-        color_text:   tuple = (30,  35,  60),
-        color_ripple: tuple = (100, 140, 255),
-        border_radius: int  = 10,
-        border_width:  int  = 2,
-        border_color:  tuple = (180, 195, 230),
-        padding_x: int = 18,
-        padding_y: int = 10,
-        icon_gap:  int = 10,
-        shadow:    bool  = True,
-        shadow_color: tuple = (80, 100, 160, 60),
-        enabled:   bool  = True,
+            self,
+            x: int,
+            y: int,
+            width: int,
+            height: int,
+            label: str = "",
+            image: "pygame.Surface | None" = None,
+            image_size: "tuple[int,int] | None" = None,
+            callback=None,
+            # style
+            font=None,
+            font_size: int = 22,
+            color_bg: tuple = (255, 255, 255),
+            color_hover: tuple = (230, 238, 255),
+            color_press: tuple = (200, 215, 245),
+            color_text: tuple = (30, 35, 60),
+            color_ripple: tuple = (100, 140, 255),
+            border_radius: int = 10,
+            border_width: int = 2,
+            border_color: tuple = (180, 195, 230),
+            padding_x: int = 18,
+            padding_y: int = 10,
+            icon_gap: int = 10,
+            shadow: bool = True,
+            shadow_color: tuple = (80, 100, 160, 60),
+            enabled: bool = True,
     ):
         self._base_rect = pygame.Rect(x, y, width, height)
-        self.rect       = self._base_rect.copy()
+        self.rect = self._base_rect.copy()
 
-        self.label      = label or ""
-        self.callback   = callback
-        self.enabled    = enabled
+        self.label = label or ""
+        self.callback = callback
+        self.enabled = enabled
 
         # colours
-        self._color_bg     = color_bg
-        self._color_hover  = color_hover
-        self._color_press  = color_press
-        self._color_text   = color_text
+        self._color_bg = color_bg
+        self._color_hover = color_hover
+        self._color_press = color_press
+        self._color_text = color_text
         self._color_ripple = color_ripple
         self._border_radius = border_radius
-        self._border_width  = border_width
-        self._border_color  = border_color
-        self._padding_x     = padding_x
-        self._padding_y     = padding_y
-        self._icon_gap      = icon_gap
-        self._shadow        = shadow
-        self._shadow_color  = shadow_color
+        self._border_width = border_width
+        self._border_color = border_color
+        self._padding_x = padding_x
+        self._padding_y = padding_y
+        self._icon_gap = icon_gap
+        self._shadow = shadow
+        self._shadow_color = shadow_color
 
         # font
         if font is not None:
@@ -417,12 +419,12 @@ class Button:
             self._image = image
 
         # animation state
-        self._hovered:      bool  = False
-        self._pressed:      bool  = False
-        self._hover_t:      float = 0.0   # 0=normal, 1=fully hovered
-        self._scale:        float = 1.0
-        self._ripples:      list  = []    # [(cx,cy,birth_time)]
-        self._clock_ref:    int   = pygame.time.get_ticks()
+        self._hovered: bool = False
+        self._pressed: bool = False
+        self._hover_t: float = 0.0  # 0=normal, 1=fully hovered
+        self._scale: float = 1.0
+        self._ripples: list = []  # [(cx,cy,birth_time)]
+        self._clock_ref: int = pygame.time.get_ticks()
 
         # disabled style
         self._alpha_disabled = 120
@@ -463,8 +465,8 @@ class Button:
 
     def update(self) -> None:
         """Call once per frame."""
-        now  = pygame.time.get_ticks() / 1000.0
-        dt   = now - self._clock_ref / 1000.0
+        now = pygame.time.get_ticks() / 1000.0
+        dt = now - self._clock_ref / 1000.0
         self._clock_ref = pygame.time.get_ticks()
 
         # Smooth hover lerp
@@ -486,13 +488,13 @@ class Button:
         # Compute scaled rect (centred on base rect)
         cx = self._base_rect.centerx
         cy = self._base_rect.centery
-        sw = int(self._base_rect.width  * self._scale)
+        sw = int(self._base_rect.width * self._scale)
         sh = int(self._base_rect.height * self._scale)
         draw_rect = pygame.Rect(cx - sw // 2, cy - sh // 2, sw, sh)
 
         # ── draw onto an intermediate surface so we can alpha-fade when disabled
         buf = pygame.Surface((self._base_rect.width, self._base_rect.height),
-                              pygame.SRCALPHA)
+                             pygame.SRCALPHA)
         local_rect = pygame.Rect(0, 0, sw, sh)
         local_rect.center = (self._base_rect.width // 2,
                              self._base_rect.height // 2)
@@ -508,8 +510,12 @@ class Button:
             shadow_alpha = int(self._shadow_color[3] if len(self._shadow_color) > 3 else 60)
             blur = int(self._lerp(self._SHADOW_NORMAL, self._SHADOW_HOVER, self._hover_t))
             for b in range(blur, 0, -1):
-                sc = (*self._shadow_color[:3],
-                      max(0, int(shadow_alpha * b / blur * 0.4)))
+                sc = (
+                    max(0, min(255, self._shadow_color[0])),
+                    max(0, min(255, self._shadow_color[1])),
+                    max(0, min(255, self._shadow_color[2])),
+                    max(0, int(shadow_alpha * b / blur * 0.4)),
+                )
                 sr = local_rect.inflate(b * 2, b * 2).move(0, b)
                 pygame.draw.rect(buf, sc, sr,
                                  border_radius=self._border_radius + b)
@@ -523,17 +529,20 @@ class Button:
             ripple_surf = pygame.Surface(
                 (self._base_rect.width, self._base_rect.height), pygame.SRCALPHA)
             for r in self._ripples:
-                age      = now - r["born"]
-                progress = age / self._RIPPLE_LIFE          # 0→1
-                max_r    = math.hypot(self._base_rect.width,
-                                      self._base_rect.height) * 0.75
-                radius   = int(max_r * self._ease_out(progress))
-                alpha    = int(180 * (1.0 - progress))
+                age = now - r["born"]
+                progress = age / self._RIPPLE_LIFE  # 0→1
+                max_r = math.hypot(self._base_rect.width,
+                                   self._base_rect.height) * 0.75
+                radius = int(max_r * self._ease_out(progress))
+                alpha = int(180 * (1.0 - progress))
                 pygame.draw.circle(
                     ripple_surf,
-                    (*self._color_ripple, alpha),
+                    (max(0, min(255, self._color_ripple[0])),
+                     max(0, min(255, self._color_ripple[1])),
+                     max(0, min(255, self._color_ripple[2])),
+                     max(0, min(255, alpha))),
                     (int(r["cx"] * self._scale +
-                         self._base_rect.width  * (1 - self._scale) / 2),
+                         self._base_rect.width * (1 - self._scale) / 2),
                      int(r["cy"] * self._scale +
                          self._base_rect.height * (1 - self._scale) / 2)),
                     radius,
@@ -549,7 +558,12 @@ class Button:
 
         # ── border ──────────────────────────────────────────────────
         if self._border_width:
-            pygame.draw.rect(buf, (*self._border_color, 255), local_rect,
+            pygame.draw.rect(buf,
+                             (max(0, min(255, self._border_color[0])),
+                              max(0, min(255, self._border_color[1])),
+                              max(0, min(255, self._border_color[2])),
+                              255),
+                             local_rect,
                              width=self._border_width,
                              border_radius=self._border_radius)
 
@@ -568,8 +582,11 @@ class Button:
     def is_hovered(self) -> bool:
         return self._hovered and self.enabled
 
-    def enable(self)  -> None:  self.enabled = True
-    def disable(self) -> None:  self.enabled = False
+    def enable(self) -> None:
+        self.enabled = True
+
+    def disable(self) -> None:
+        self.enabled = False
 
     # ----------------------------------------------------------------
     # Private helpers
@@ -591,7 +608,7 @@ class Button:
         if not pieces:
             return
 
-        gap   = self._icon_gap if len(pieces) > 1 else 0
+        gap = self._icon_gap if len(pieces) > 1 else 0
         total_w = sum(p.get_width() for p in pieces) + gap * (len(pieces) - 1)
         total_h = max(p.get_height() for p in pieces)
 
@@ -610,7 +627,7 @@ class Button:
     @staticmethod
     def _lerp_color(c1: tuple, c2: tuple, t: float) -> tuple:
         t = max(0.0, min(1.0, t))
-        return tuple(int(a + (b - a) * t) for a, b in zip(c1[:3], c2[:3]))
+        return tuple(max(0, min(255, int(a + (b - a) * t))) for a, b in zip(c1[:3], c2[:3]))
 
     @staticmethod
     def _ease_out(t: float) -> float:
@@ -624,6 +641,8 @@ class Button:
             if f:
                 return f
         return pygame.font.Font(None, size)
+
+
 class Label:
     """
     A Pygame label widget for displaying text or an image (or both).
@@ -732,24 +751,31 @@ class Label:
         self._cache:  "pygame.Surface | None" = None
 
         self._last_tick = pygame.time.get_ticks()
-
+        w,h=self.get_rect().size
         if pos_type == "center":
-            w,h=self.get_rect().size
             self._x-=w//2
             self._y-=h//2
         if pos_type=="leftcenter":
-            w,h=self.get_rect().size
             self._y-=h//2
         if pos_type=="center_top":
-            w,h=self.get_rect().size
             self._x-=w//2
-
-        self._rect:   pygame.Rect             = pygame.Rect(self._x, self._y, 0, 0)
+        if pos_type=="right_top":
+            self._x-=w
+        if pos_type=="right_center":
+            self._x-=w
+            self._y-=h//2
+        self._rect.topleft = (self._x, self._y)
 
 
     # ----------------------------------------------------------------
     # Public API
     # ----------------------------------------------------------------
+    def move_y(self, dy: int):
+        self._y+=dy
+        self._rect.topleft = (self._x, self._y)
+    def set_y(self, y: int):
+        self._y=y
+        self._rect.topleft = (self._x, self._y)
 
     def set_text(self, text: str) -> "Label":
         self._text  = text
@@ -806,6 +832,7 @@ class Label:
         # 1. Render text lines
         lines      = self._wrap_text()
         line_surfs = [self._font.render(l, True, self._color_text) for l in lines]
+        self.first_line_w=line_surfs[0].get_width() if line_surfs else 0
 
         line_h     = self._font.get_linesize()
         text_w     = max((s.get_width() for s in line_surfs), default=0)
@@ -1619,6 +1646,160 @@ class Leader_board:
             self.is_scrolled=False
             self.prev_mouse_y=None
         return None
+from functions import cords_to_str,create_gradient_numpy
+
+from functions import create_fade_mask,twodistance_sq
+class Description:
+    def __init__(self,width,height,text):
+        self.surface=pygame.Surface((width,height),pygame.SRCALPHA)
+        self.rect=self.surface.get_rect()
+
+        self.padding_x=10
+        self.padding_y=10
+
+        font_size=23
+        self.text=Label(self.padding_x,self.padding_y,text=text,color_text=(255,255,255),font_size=font_size,max_width=width-self.padding_x*2)
+
+        x=self.text.first_line_w+10
+        self.inactive_label=Label(x,self.padding_y,text="[...]",color_text=(255,255,255),font_size=font_size)
+
+        self.active=False
+        self.pressed=False
+
+        self.scrolling=False
+        self.scroll=0
+        self.prev_mouse_pos=None
+        # self.scroll
+        self.fade_h=15
+        self.fade_surface_up=create_fade_mask(width,self.fade_h,strength=0.5,direction="top").convert_alpha()
+        self.fade_surface_down=create_fade_mask(width,self.fade_h,strength=0.5,direction="bottom").convert_alpha()
+
+        self.txt_h=self.text.get_rect().h
+    def draw(self):
+        self.surface.fill((0,0,0,0))
+        if not self.active:
+            self.scroll=0
+            self.inactive_label.draw(self.surface)
+        self.text.set_y(self.padding_y-self.scroll)
+        self.text.draw(self.surface)
+        self.surface.blit(self.fade_surface_up,(0,0), special_flags=pygame.BLEND_RGBA_MULT)
+        self.surface.blit(self.fade_surface_down,(0,self.rect.height-self.fade_h), special_flags=pygame.BLEND_RGBA_MULT)
+        return self.surface
+    def check_swipe(self,mp):
+        r=4
+        if twodistance_sq(mp,self.prev_mouse_pos)<=r*r:
+            return False
+        return True
+    def check_press(self,mouse_delta=(0,0)):
+        mp=add_vectors(pygame.mouse.get_pos(),mouse_delta)
+        mp_global=pygame.mouse.get_pos()
+        mc=pygame.mouse.get_pressed()[0]
+
+        if self.scrolling and not mc:
+            self.scrolling=False
+            self.prev_mouse_pos=None
+            self.pressed=False
+        elif self.scrolling and mc:
+            self.scroll-=mp_global[1]-self.prev_mouse_pos[1]
+            self.scroll=normalise_scroll(self.scroll,self.txt_h+self.padding_y*2,self.rect.height)
+
+            self.prev_mouse_pos=mp_global
+            return False
+
+        if self.prev_mouse_pos is None and mc and self.rect.collidepoint(mp):
+            self.prev_mouse_pos=mp_global
+        elif mc and self.prev_mouse_pos is not None and self.check_swipe(mp_global) :
+            self.prev_mouse_pos=mp_global
+            self.scrolling=True
+            return False
+        elif not mc:
+            self.prev_mouse_pos = None
+        if self.scrolling: print("scrolling")
+        if mc and self.rect.collidepoint(mp):
+            self.pressed=True
+        elif self.rect.collidepoint(mp) and self.pressed:
+            self.active=not self.active
+            self.pressed=False
+            return True
+        else:
+            self.pressed=False
+        return False
+class CompCard:
+    def __init__(self,width,height,img:pygame.surface.Surface,avatar:pygame.Surface,name,title,date,cords,description):
+        self.surface=pygame.Surface((width,height),pygame.SRCALPHA)
+        self.img=img
+        self.img_pos=(width/2-img.get_width()/2,height/2-img.get_height()/2)
+        self.h=height
+
+
+        gradient_h=80
+        self.gradient=create_gradient_numpy(width,gradient_h,max_alpha=250,direction="top",strength=2).convert_alpha()
+
+        avatar_r=30
+        avatar_x=10+avatar_r
+        avatar_y=10+avatar_r
+        self.avatar=Icon(avatar_x,avatar_y,avatar_r,image=avatar,shadow=False)
+
+        font_size=20
+
+        name_x=avatar_x+avatar_r*2+10
+        name_y=10
+        self.name_label=Label(name_x,name_y,text=name,color_text=(255,255,255),font_size=font_size,pos_type="left_top")
+
+        font_size=15
+        date_x=width-20
+        date_y=5
+        self.date_label=Label(date_x,date_y,text=date,color_text=(200,200,200),font_size=font_size,pos_type="right_top")
+
+        cords_x=date_x-self.date_label.get_rect().w-100
+        cords_y=date_y
+        self.cords_label=Label(cords_x,cords_y,text=cords_to_str(cords),color_text=(200,200,200),font_size=font_size,pos_type="right_top")
+
+        self.desc_h_na=50
+        self.desc_h_active=200
+
+        self.description=Description(width,self.desc_h_active,description)
+        self.desc_h_active=min(self.desc_h_active,self.description.txt_h+self.description.padding_y*2)
+        self.desc_y=height-self.desc_h_na
+
+
+        sliding_cycles=10
+        self.sliding_dy=(self.desc_h_active-self.desc_h_na)/sliding_cycles
+        self.sliding="down"
+        self.darken_color=(0,0,0,200)
+    def update(self,mouse_delta=(0,0)):
+        mp=add_vectors(pygame.mouse.get_pos(),mouse_delta)
+        if self.sliding=="up":
+            self.desc_y=max(self.desc_y-self.sliding_dy,self.h-self.desc_h_active)
+        elif self.sliding=="down":
+            self.desc_y=min(self.desc_y+self.sliding_dy,self.h-self.desc_h_na)
+        if not self.surface.get_rect().collidepoint(mp):
+            return
+        self.avatar.update()
+        if self.description.check_press((mouse_delta[0],mouse_delta[1]-self.desc_y)):
+            if self.sliding=="down":
+                self.sliding="up"
+            else:
+                self.sliding="down"
+    def darken(self,alpha):
+        darken = pygame.Surface(self.surface.get_size())
+        darken.fill((alpha, alpha, alpha))  # lower values = darker
+        self.surface.blit(darken, (0, 0), special_flags=pygame.BLEND_RGB_MULT)
+    def draw(self):
+        color=(50,50,50)
+        self.surface.fill(color)
+        self.surface.blit(self.img,self.img_pos)
+        self.surface.blit(self.gradient,(0,0))
+
+        self.avatar.draw(self.surface)
+        self.name_label.draw(self.surface)
+        self.date_label.draw(self.surface)
+        self.cords_label.draw(self.surface)
+
+        if self.description.active:
+            self.darken(100)
+        self.surface.blit(self.description.draw(),(0,self.desc_y))
+        return self.surface
 
 
 

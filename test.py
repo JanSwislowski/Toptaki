@@ -18,42 +18,39 @@ post=Post(400, "Test Post",None,c,images=images,text=text,)
 post2=Post(400, "Test Post 2",None,c,images=images,text=text,)
 post3=Post(400, "Test Post 3",None,c,images=images,text=text,)
 
+description=r"This is a test description\n for the leaklonsadgobder board. It should be long enough to test the text wrapping functionality of the Leader_board class. Let's see how it looks when rendered on the screen."
+card_info={"img":"photo3.PNG","name":"User1","avatar":"photo2.jpg","title":"Nigga","date":"2024-06-01","cords":((10,0),(10,0)),"description":description*1}
+card2_info=card_info.copy()
+
+card2_info["name"]="User2"
+card2_info["description"]=description*2
+card2_info["img"]="photo.jpg"
+
+
 pos=(0, 0)
 pos_delta=(-pos[0], -pos[1])
 
-players=[{"label":"1st","name":"Player1","elo":str(100)},
-         {"label":"2nd","name":"Player2","elo":str(90)},
-            {"label":"3rd","name":"Player3","elo":str(80)},
-            {"label":"4th","name":"Player4","elo":str(70)},
-            {"label":"5th","name":"Player5","elo":str(60)},
-            {"label":"6th","name":"Player6","elo":str(50)},
-            {"label":"7th","name":"Player7","elo":str(40)},
-            {"label":"8th","name":"Player8","elo":str(30)},
-            {"label":"9th","name":"Player9","elo":str(20)},
-            {"label":"10th","name":"Player10","elo":str(10)},
-            {"label":"3rd","name":"Player3","elo":str(80)},
-            {"label":"4th","name":"Player4","elo":str(70)},
-            {"label":"5th","name":"Player5","elo":str(60)},
-            {"label":"6th","name":"Player6","elo":str(50)},
-            {"label":"7th","name":"Player7","elo":str(40)},
-            {"label":"8th","name":"Player8","elo":str(30)},
-            {"label":"9th","name":"Player9","elo":str(20)},
-            {"label":"10th","name":"Player10","elo":str(10)},
-
-]
-
-lb=Leader_board(400,600,"Tournament",players)
-
+w=500
+h=700
+bs=BattleScreen(w,h,400,500)
+bs.load(card_info,card2_info)
+pos=(screen.get_width()//2-w//2, screen.get_height()//2-h//2)
+print(pos)
 running=True
 # lb_pos_delta=(0, 0)
+clock = pygame.time.Clock()
 while running:
     for event in pygame.event.get():
         if event.type==pygame.QUIT:
             running=False
-        # pe.handle_event(event,)
+        bs.handle_event(event,)
     screen.fill((0, 0, 0))
-    lb.update(pos_delta)
+    bs.update(pos_delta)
 
-    screen.blit(lb.draw(), pos)
+    fps = clock.get_fps()
+    print(f"FPS: {fps:.2f}")
 
+    screen.blit(bs.draw(), pos)
+
+    clock.tick(60)  # target FPS
     pygame.display.flip()
